@@ -1,25 +1,35 @@
 use std::fs::File;
+use std::path::Path;
 use std::io::{BufReader, Error, Read};
 
-fn read_file(file_path: &str ) -> Result<Vec<u8>, Error>{
-    let mut file = File::open(file_path)?;
-    let mut reader = BufReader::new(file);
-    
-    let mut chunks = Vec::new();
-    loop{
-        let mut chunk = [0; 1024];
-        match reader.read(&mut chunk) {
-            Ok(n)=>{
-                chunks.extend_from_slice(&chunk[..n]);
-                if n == 0 {
-                    break;
-                }
-            }
-            Err(e) => return Err(e),
-        }
-    }
-    Ok(chunks)
+#[derive(Debug)]
+pub struct MP4Reader{
+    pub file_path: Path,
+    pub data: Vec<u8>,
 }
+
+Impl MP4Reader{
+    fn read_file(file_path: &str ) -> Result<Vec<u8>, Error>{
+        let mut file = File::open(file_path)?;
+        let mut reader = BufReader::new(file);
+        
+        let mut chunks = Vec::new();
+        loop{
+            let mut chunk = [0; 1024];
+            match reader.read(&mut chunk) {
+                Ok(n)=>{
+                    chunks.extend_from_slice(&chunk[..n]);
+                    if n == 0 {
+                        break;
+                    }
+                }
+                Err(e) => return Err(e),
+            }
+        }
+        Ok(chunks)
+    }    
+}
+
 
 fn main() {
     println!("Hello, world!");
