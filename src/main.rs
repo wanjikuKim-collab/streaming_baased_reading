@@ -1,6 +1,9 @@
 mod mp4_reader;
+mod file_encryption;
+
 
 use mp4_reader::read_file;
+
 fn main() {
     match read_file("/home/wanjiku/Development/code/rust/streaming_baased_reading/src/How to use FFMPEG.mp4") {
         Ok(data) => {
