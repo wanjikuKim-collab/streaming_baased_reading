@@ -1,42 +1,91 @@
 mod mp4_reader;
 
-use mp4_reader::{read_file, MP4ReaderError};
-use ring::{aead, cipher}; // Import necessary modules from ring
 
-fn encrypt_chunks(chunks: &[Vec<u8>], key: &[u8]) -> Result<Vec<Vec<u8>>, MP4ReaderError> {
-    let aad = aead::Aad::empty(); // Authenticated Additional Data (optional)
-  
-    let mut sealed_chunks = Vec::new();
-    for chunk in chunks.iter() {
-      let nonce = ring::rand::SystemRandom::new()?.generate::<[u8; 12]>()?; // Generate unique nonce
-      let sealing_key = aead::SealingKey::new(&ring::hmac::Key::new(ring::hmac::HMAC_SHA256, key)?, &aad)?;
-      let ciphertext = aead::encrypt(&sealing_key, &nonce, chunk, &aad)?;
-      sealed_chunks.push(nonce.to_vec());
-      sealed_chunks.extend_from_slice(&ciphertext);
-    }
-  
-    Ok(sealed_chunks)
-  }
-  
+use ring::{
+  rand,
+  signature::{self, KeyPair},
+};
+use std::io::Write;
+// use ring::aead::BoundKey;
+use std::fs;
 
+// fn encrypt_file(input_file_path: &str, output_file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+//     let file_data = mp4_reader::read_file(input_file_path).unwrap();
 
-  fn main() {
-    match read_file("/home/wanjiku/Development/code/rust/streaming_baased_reading/src/How to use FFMPEG.mp4") {
-      Ok(data) => {
-        // Read the key from a file (implement logic to read the key)
-        let key = // ... (Code to read the key from a file)
+//     let mut rng = SystemRandom::new();
+//     let mut key_bytes = [0u8; 32];
+//     rng.fill(&mut key_bytes).unwrap();
+
+//     let mut nonce_bytes = [0u8; 12];
+//     rng.fill(&mut nonce_bytes)?;
+
+//     let key = UnboundKey::new(&AES_256_GCM, &key_bytes);
+//     let nonce = Nonce::try_assume_unique_for_key(&nonce_bytes);
+//     let sealing_key = SealingKey::new(key, &nonce).unwrap();
+
+//     let mut encrypted_data = Vec::new();
+//     let mut tag = vec![0u8; 16];
+
+//     for chunk in file_data.chunks(1024 * 1024) {
+//         let aad = Aad::empty();
+//         let mut buffer = chunk.to_vec();
+//         let encrypted_len = sealing_key.seal_in_place_append_tag(&mut buffer, &aad)?;
+//         encrypted_data.extend_from_slice(&buffer[..encrypted_len]);
+//         tag.copy_from_slice(&buffer[encrypted_len..]);
+//     }
+
+//     let mut output_file = std::fs::File::create(outpuuse ring::aead::{Aad, NonceSequence, SealingKey, UnboundKey, AES_256_GCM};
+//       // let mut output_file =fs::File
+//         use ring::rand::SystemRandom;
         
-        // Encrypt the data chunks
-        match encrypt_chunks(&data, &key) {
-          Ok(encrypted_chunks) => {
-            // Write the encrypted data to a new file (implement logic)
-            // ... (Code to write encrypted data to a file)
-            println!("Data encrypted successfully!");
-          }
-          Err(e) => println!("Error encrypting data: {:?}", e),
+        
+//         pub fn encrypt_file_data(
+//           data: &[u8],
+//           key: &[u8; 32],
+//         ) -> Result<Vec<u8>, ring::error::Unspecified> {
+//           let mut random = SystemRandom::new()?;
+//           let mut nonce_bytes = [0u8; 12]; // Change to desired nonce size
+//           random.fill(&mut nonce_bytes)?;
+//           let nonce = NonceSequence::from_slice(&nonce_bytes)?;
+        
+//           let key = UnboundKey::new(&AES_256_GCM, key)?;
+//           let sealing_key = SealingKey::new(key.as_ref(), &nonce)?;
+        
+//           let aad = Aad::empty();
+//           let encrypted_data = sealing_key.seal_in_place_append_tag(data, &aad)?;
+        
+//           Ok(encrypted_data)
+//         }
+//         t_file_path)?;
+//     output_file.write_all(&encrypted_data)?;
+//     output_file.write_all(&tag)?;
+
+//     Ok(())
+// }
+
+
+use mp4_reader::read_file;
+fn main() {
+    println!("Hello, world!");
+    match read_file("/home/wanjiku/Development/code/rust/streaming_baased_reading/src/How to use FFMPEG.mp4") {
+      //
+        Ok(data) => {
+          // Generate a key pair in PKCS#8 (v2) format.
+let rng: rand::SystemRandom = rand::SystemRandom::new();
+let pkcs8_bytes = signature::Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
+//Normally the application would store the PKCS#8 file persistently. Later
+// it would read the PKCS#8 file from persistent storage to use it.
+
+let key_pair = signature::Ed25519KeyPair::from_pkcs8(pkcs8_bytes.as_ref()).unwrap();
+
+// Sign the message "hello, world".
+// const MESSAGE: &[u8] = b"hello, world";
+let sig: signature::Signature = key_pair.sign(&data);
+        //Process the data (e'g print the bytes)
+        println!("Read the bytes {:?}",key_pair);
         }
-      }
-      Err(e) => println!("Error reading file: {:?}", e),
-    }
-  }
-  
+        Err(e) => {
+        println!("Error reading file: {:?}", e)
+        }      
+   } 
+}

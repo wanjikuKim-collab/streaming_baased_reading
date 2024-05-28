@@ -19,8 +19,7 @@ pub fn read_file(file_path: &str ) -> Result<Vec<u8>, MP4ReaderError>{
     };
 
     // read file into BufReader
-    let mut reader = BufReader::new(file);
-    
+    let mut reader = BufReader::new(file);    
     let mut chunks = Vec::with_capacity(1024*1024*10);
     //loop reads data from a file in chunks
     loop{
