@@ -1,10 +1,7 @@
 mod mp4_reader;
+mod file_encryption;
 
 
-use ring::{
-  rand,
-  signature::{self, KeyPair},
-};
 use std::io::Write;
 // use ring::aead::BoundKey;
 use std::fs;
@@ -64,28 +61,17 @@ use std::fs;
 // }
 
 
+
+
 use mp4_reader::read_file;
 fn main() {
-    println!("Hello, world!");
-    match read_file("/home/wanjiku/Development/code/rust/streaming_baased_reading/src/How to use FFMPEG.mp4") {
-      //
-        Ok(data) => {
-          // Generate a key pair in PKCS#8 (v2) format.
-let rng: rand::SystemRandom = rand::SystemRandom::new();
-let pkcs8_bytes = signature::Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
-//Normally the application would store the PKCS#8 file persistently. Later
-// it would read the PKCS#8 file from persistent storage to use it.
-
-let key_pair = signature::Ed25519KeyPair::from_pkcs8(pkcs8_bytes.as_ref()).unwrap();
-
-// Sign the message "hello, world".
-// const MESSAGE: &[u8] = b"hello, world";
-let sig: signature::Signature = key_pair.sign(&data);
-        //Process the data (e'g print the bytes)
-        println!("Read the bytes {:?}",key_pair);
-        }
-        Err(e) => {
-        println!("Error reading file: {:?}", e)
-        }      
-   } 
+  match read_file("/home/wanjiku/Development/code/rust/streaming_baased_reading/src/How to use FFMPEG.mp4") {
+      Ok(data) => {
+      //Process the data (e'g print the bytes)
+      println!("Read the bytes: {:?}", &data);
+      }
+      Err(e) => {
+      println!("Error reading file: {:?}", e)
+      }      
+ } 
 }
