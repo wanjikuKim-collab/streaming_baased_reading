@@ -13,5 +13,8 @@ pub fn encrypt_file(data: &Vec<u8>){
     
     rand.fill(&mut key_bytes);
     println!("key_bytes in hex, {}", hex::encode(&key_bytes));
+    
+    // Create a new AEAD key without a designated role or nonce sequence
+    let unbound_key: Result<UnboundKey, ring::error::Unspecified> = UnboundKey::new(&AES_256_GCM, &key_bytes);
 
   }
