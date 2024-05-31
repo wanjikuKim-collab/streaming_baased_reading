@@ -1,5 +1,6 @@
 
-use ring::aead::{Aad, Nonce, SealingKey, UnboundKey, AES_256_GCM};
+use ring::aead::{Aad, Nonce, SealingKey, UnboundKey, AES_256_GCM, NONCE_LEN};
+use ring::error::Unspecified;
 use ring::rand::{SecureRandom, SystemRandom};
 use hex;
 
@@ -16,5 +17,26 @@ pub fn encrypt_file(data: &Vec<u8>){
     
     // Create a new AEAD key without a designated role or nonce sequence
     let unbound_key: Result<UnboundKey, ring::error::Unspecified> = UnboundKey::new(&AES_256_GCM, &key_bytes);
+
+    //Create unit struct for the counter nonce sequence
+    struct CounterNonceSequence(u32);
+
+    impl NonceSequence for CounterNonceSequence{
+      // called once for each seal operation
+      fn advance(&mut self)-> Result<Nonce, Unspecified>{
+        let mut nonce_bytes = vec![0; NONCE_LEN];
+
+        let bytes = self.0.to_be_bytes();
+        nonce_bytes[8..].copy_from_slice(&bytes);
+        println!("nonce_bytes = {}", hex::encode(&nonce_bytes));
+
+        self.0 += 1; //advance the counter
+        Nonce::try_assume_unique_for_key(&nonce_bytes)
+      }
+    }
+
+    //Create a new NonceSequence type that generates nonces
+    let nonce_sequence = CounterNonceSequence(1);
+
 
   }
