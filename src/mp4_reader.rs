@@ -2,12 +2,16 @@ use std::fs::File;
 use std::io::{BufReader, Error, ErrorKind, Read};
 
 #[derive(Debug)]
+// Define a custom error enum to handle different file-related errors.
+
 pub enum MP4ReaderError {
     FileNotFound(String),
     PermissionDenied(String),
     IoError(Error),
+    EncryptionError(ring::error::Unspecified),
 }
 
+// Function to read a file and return its contents as a Vec<u8>.
 pub fn read_file(file_path: &str ) -> Result<Vec<u8>, MP4ReaderError>{
     let file = match File::open(file_path) {
         Ok(file) => file,
@@ -21,7 +25,7 @@ pub fn read_file(file_path: &str ) -> Result<Vec<u8>, MP4ReaderError>{
     // read file into BufReader
     let mut reader = BufReader::new(file);    
     let mut chunks = Vec::with_capacity(1024*1024*10);
-    //loop reads data from a file in chunks
+    //loop reads data from a file in 1MB chunks
     loop{
         let mut chunk = [0; 1024*1024];
         match reader.read(&mut chunk) {
