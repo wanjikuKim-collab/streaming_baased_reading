@@ -2,12 +2,11 @@ use hex;
 use std::fs::File;
 use std::io::Write;
 use ring::aead::{
-    Aad, BoundKey, Nonce, NonceSequence, SealingKey, Tag, UnboundKey, AES_256_GCM, NONCE_LEN,
+    Aad, BoundKey, Nonce, NonceSequence, SealingKey, UnboundKey, AES_256_GCM, NONCE_LEN,
 };
 use ring::error::Unspecified;
 use ring::rand::{SecureRandom, SystemRandom};
 
-use crate::mp4_reader::read_file;
 use crate::mp4_reader::MP4ReaderError;
 
 //Create unit struct for the counter nonce sequence
@@ -40,7 +39,7 @@ pub fn encrypt_file(
     let mut key_bytes = vec![0; AES_256_GCM.key_len()]; //32 byte vector
     println!("key_bytes in binary, {:?}", key_bytes);
 
-    rand.fill(&mut key_bytes);
+    rand.fill(&mut key_bytes).map_err(|e| MP4ReaderError::EncryptionError(e))?;
     println!("key_bytes in hex, {}", hex::encode(&key_bytes));
 
     // Create a new AEAD key using the generated key bytes
